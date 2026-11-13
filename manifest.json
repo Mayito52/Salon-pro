@@ -1,0 +1,20 @@
+{
+  "name": "SalonPro - Contabilidad de Peluquería",
+  "short_name": "SalonPro",
+  "description": "Control de Inventario en Onzas y Contabilidad para Salones de Belleza",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f8f9fb",
+  "theme_color": "#9d5b78",
+  "categories": ["business", "finance", "productivity"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

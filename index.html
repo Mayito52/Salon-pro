@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>SalonPro - Contabilidad e Inventario en Onzas</title>
+
+  <!-- PWA & MOBILE META TAGS -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#9d5b78">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SalonPro">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+  <!-- BARRA DE NAVEGACIÓN SUPERIOR (DESKTOP) -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="6" cy="6" r="3"></circle>
+            <circle cx="6" cy="18" r="3"></circle>
+            <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+            <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
+            <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">SalonPro Accounting</h1>
+          <p class="brand-subtitle">Control de Inventario en Onzas & Contabilidad</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn btn-sm btn-mobile-connect" onclick="app.openMobileModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+          <span>📱 Instalar en Celular</span>
+        </button>
+      </div>
+
+      <nav class="main-nav desktop-only" id="mainNav">
+        <button class="nav-btn active" data-tab="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span>Panel General</span>
+        </button>
+        <button class="nav-btn" data-tab="trabajos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <span>Trabajos & Clientes</span>
+        </button>
+        <button class="nav-btn" data-tab="compras">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+          <span>Compras Químicos</span>
+        </button>
+        <button class="nav-btn" data-tab="inventario">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+          <span>Stock de Onzas</span>
+        </button>
+        <button class="nav-btn" data-tab="gastos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+          <span>Gastos Local</span>
+        </button>
+        <button class="nav-btn" data-tab="ajustes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span>Ajustes</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="main-content">
+
+    <!-- AVISO DE STOCK BAJO (DINÁMICO) -->
+    <div id="stockAlertBanner" class="alert-banner hidden">
+      <div class="alert-content">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        <span id="stockAlertText">Atención: Hay productos con pocas onzas disponibles.</span>
+      </div>
+      <button class="btn btn-sm btn-outline-light" onclick="app.switchTab('inventario')">Ver</button>
+    </div>
+
+    <!-- SECCIÓN 1: PANEL GENERAL (DASHBOARD) -->
+    <section id="tab-dashboard" class="tab-pane active">
+      <div class="section-header">
+        <div>
+          <h2>Panel Contable del Salón</h2>
+          <p class="text-muted">Resumen financiero, consumo de insumos y beneficios en tiempo real</p>
+        </div>
+        <div class="period-filter">
+          <label for="dashboardPeriod">Periodo:</label>
+          <select id="dashboardPeriod" class="form-control" onchange="app.renderDashboard()">
+            <option value="all">Todo el Historial</option>
+            <option value="today">Hoy</option>
+            <option value="month" selected>Este Mes</option>
+            <option value="lastMonth">Mes Anterior</option>
+            <option value="year">Este Año</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- TARJETAS DE INDICADORES PRINCIPALES (KPIS) -->
+      <div class="stats-grid">
+        <div class="stat-card stat-income">
+          <div class="stat-header">
+            <span class="stat-label">Ingresos Trabajos</span>
+            <span class="stat-icon">💰</span>
+          </div>
+          <div class="stat-value" id="kpiIncome">$0.00</div>
+          <div class="stat-sub" id="kpiIncomeJobs">0 servicios</div>
+        </div>
+
+        <div class="stat-card stat-material">
+          <div class="stat-header">
+            <span class="stat-label">Material Consumido</span>
+            <span class="stat-icon">🧪</span>
+          </div>
+          <div class="stat-value" id="kpiMaterial">$0.00</div>
+          <div class="stat-sub" id="kpiOuncesUsed">0 oz gastadas</div>
+        </div>
+
+        <div class="stat-card stat-salaries">
+          <div class="stat-header">
+            <span class="stat-label">Salarios Estilistas</span>
+            <span class="stat-icon">💇‍♀️</span>
+          </div>
+          <div class="stat-value" id="kpiSalaries">$0.00</div>
+          <div class="stat-sub">Pago a peluqueros</div>
+        </div>
+
+        <div class="stat-card stat-expenses">
+          <div class="stat-header">
+            <span class="stat-label">Gastos del Local</span>
+            <span class="stat-icon">🏢</span>
+          </div>
+          <div class="stat-value" id="kpiFixedExpenses">$0.00</div>
+          <div class="stat-sub">Alquiler, gestor, multas</div>
+        </div>
+
+        <div class="stat-card stat-profit highlight">
+          <div class="stat-header">
+            <span class="stat-label">Beneficio Neto Salón</span>
+            <span class="stat-icon">💎</span>
+          </div>
+          <div class="stat-value" id="kpiNetProfit">$0.00</div>
+          <div class="stat-sub">Ingresos - Insumos - Salarios - Gastos</div>
+        </div>
+
+        <div class="stat-card stat-stock">
+          <div class="stat-header">
+            <span class="stat-label">Valor en Stock</span>
+            <span class="stat-icon">📦</span>
+          </div>
+          <div class="stat-value" id="kpiStockValue">$0.00</div>
+          <div class="stat-sub" id="kpiTotalOunces">0 oz en almacén</div>
+        </div>
+      </div>
+
+      <!-- DESGLOSE COMPARATIVO & GRÁFICOS -->
+      <div class="dashboard-grid">
+        <div class="card">
+          <div class="card-header">
+            <h3>Distribución del Dinero Cobrado</h3>
+          </div>
+          <div class="card-body">
+            <div id="chartDistribution" class="custom-chart-container"></div>
+            <div class="legend-container" id="distributionLegend"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Consumo de Onzas por Producto</h3>
+          </div>
+          <div class="card-body">
+            <div id="chartOuncesBar" class="custom-chart-container"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCIONES RÁPIDAS Y ÚLTIMOS MOVIMIENTOS -->
+      <div class="dashboard-grid mt-4">
+        <div class="card">
+          <div class="card-header flex-between">
+            <h3>Últimos Trabajos</h3>
+            <button class="btn btn-sm btn-primary" onclick="app.openNewJobModal()">+ Nuevo</button>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table" id="recentJobsTable">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Clienta / Trabajo</th>
+                    <th>Cobrado</th>
+                    <th>Mat. Usado</th>
+                    <th>Salario</th>
+                    <th>Ganancia</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header flex-between">
+            <h3>Resumen Rápido de Stock (oz)</h3>
+            <button class="btn btn-sm btn-secondary" onclick="app.openNewPurchaseModal()">+ Comprar</button>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table" id="quickStockTable">
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th>Stock Actual</th>
+                    <th>Costo/oz</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: TRABAJOS & CLIENTES -->
+    <section id="tab-trabajos" class="tab-pane">
+      <div class="section-header">
+        <div>
+          <h2>Registro de Trabajos del Salón</h2>
+          <p class="text-muted">Anota cada servicio, onzas consumidas, cuánto cobraste y la división de salario y mano de obra.</p>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-primary" onclick="app.openNewJobModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>+ Registrar Nuevo Trabajo</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- FILTROS DE TRABAJOS -->
+      <div class="filter-bar card">
+        <div class="filter-inputs">
+          <input type="text" id="searchJobText" class="form-control" placeholder="Buscar por clienta, estilista o servicio..." oninput="app.renderJobsTable()">
+          <input type="date" id="filterJobDateFrom" class="form-control" onchange="app.renderJobsTable()">
+          <input type="date" id="filterJobDateTo" class="form-control" onchange="app.renderJobsTable()">
+          <button class="btn btn-secondary btn-sm" onclick="app.resetJobFilters()">Limpiar</button>
+        </div>
+        <div class="filter-summary" id="jobsTotalsSummary"></div>
+      </div>
+
+      <!-- TABLA DE TRABAJOS -->
+      <div class="card mt-3">
+        <div class="table-responsive">
+          <table class="table" id="jobsTable">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Clienta</th>
+                <th>Servicio</th>
+                <th>Estilista</th>
+                <th>Onzas Usadas & Costo</th>
+                <th>Cobrado</th>
+                <th>Salario</th>
+                <th>Ganancia Salón</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="jobsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 3: COMPRAS DE QUÍMICOS E INSUMOS -->
+    <section id="tab-compras" class="tab-pane">
+      <div class="section-header">
+        <div>
+          <h2>Compras e Ingreso de Mercancía</h2>
+          <p class="text-muted">Registra cada compra con su precio variable para calcular el costo exacto por onza y sumar stock.</p>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-primary" onclick="app.openNewPurchaseModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>+ Registrar Nueva Compra</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- TARJETAS RESUMEN DE COMPRAS -->
+      <div class="stats-grid mb-4">
+        <div class="stat-card">
+          <div class="stat-label">Total Invertido en Compras</div>
+          <div class="stat-value text-primary" id="kpiTotalPurchasesAmount">$0.00</div>
+          <div class="stat-sub" id="kpiPurchasesCount">0 compras registradas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Onzas Ingresadas</div>
+          <div class="stat-value text-success" id="kpiTotalPurchasesOunces">0 oz</div>
+          <div class="stat-sub">Histórico total recibido</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Costo Promedio General</div>
+          <div class="stat-value text-info" id="kpiAvgOunceCost">$0.00 / oz</div>
+          <div class="stat-sub">Ponderado de todas las compras</div>
+        </div>
+      </div>
+
+      <!-- TABLA DE COMPRAS -->
+      <div class="card">
+        <div class="card-header flex-between">
+          <h3>Historial Detallado de Compras</h3>
+          <div class="filter-inputs">
+            <select id="filterPurchaseProduct" class="form-control" onchange="app.renderPurchasesTable()">
+              <option value="all">Todos los productos</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table" id="purchasesTable">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Producto Comprado</th>
+                <th>Presentación</th>
+                <th>Total Onzas</th>
+                <th>Precio Pagado</th>
+                <th>Costo por Onza</th>
+                <th>Proveedor / Notas</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="purchasesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 4: INVENTARIO Y STOCK EN ONZAS -->
+    <section id="tab-inventario" class="tab-pane">
+      <div class="section-header">
+        <div>
+          <h2>Inventario Actual en Onzas</h2>
+          <p class="text-muted">Control de existencia de peróxidos, tintes, queratinas y más. ¡Puedes agregar nuevos productos!</p>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-secondary" onclick="app.openNewProductModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>+ Crear Nuevo Producto</span>
+          </button>
+          <button class="btn btn-primary" onclick="app.openNewPurchaseModal()">
+            <span>+ Ingresar Compra</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- GRID DE TARJETAS DE STOCK -->
+      <div class="inventory-grid" id="inventoryGrid"></div>
+
+      <!-- TABLA DETALLADA -->
+      <div class="card mt-4">
+        <div class="card-header">
+          <h3>Tabla Consolidada de Stock y Valoración</h3>
+        </div>
+        <div class="table-responsive">
+          <table class="table" id="inventoryDetailTable">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Categoría</th>
+                <th>Stock Actual</th>
+                <th>Costo Promedio</th>
+                <th>Valor Almacén</th>
+                <th>Consumo Histórico</th>
+                <th>Nivel</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryDetailTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 5: GASTOS DEL LOCAL -->
+    <section id="tab-gastos" class="tab-pane">
+      <div class="section-header">
+        <div>
+          <h2>Gastos del Local y Operativos</h2>
+          <p class="text-muted">Alquiler del local, gestor, multas, servicios (agua, luz, teléfono), suministros y otros costos fijos.</p>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-primary" onclick="app.openNewExpenseModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>+ Registrar Nuevo Gasto</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- CATEGORÍAS RÁPIDAS -->
+      <div class="expense-categories-grid mb-4" id="expenseCategoriesGrid"></div>
+
+      <!-- TABLA DE GASTOS -->
+      <div class="card">
+        <div class="card-header flex-between">
+          <h3>Historial de Gastos</h3>
+          <div class="filter-inputs">
+            <select id="filterExpenseCategory" class="form-control" onchange="app.renderExpensesTable()">
+              <option value="all">Todas las categorías</option>
+              <option value="local">Pago del Local / Alquiler</option>
+              <option value="gestor">Gestor / Asesoría</option>
+              <option value="multas">Multas / Tasas</option>
+              <option value="servicios">Servicios (Luz, Agua, Gas, Internet)</option>
+              <option value="limpieza">Limpieza y Descartables</option>
+              <option value="publicidad">Publicidad y Redes</option>
+              <option value="mantenimiento">Mantenimiento y Reparaciones</option>
+              <option value="otros">Otros Gastos</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table" id="expensesTable">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Categoría</th>
+                <th>Concepto / Detalle</th>
+                <th>Método de Pago</th>
+                <th>Monto</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="expensesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 6: AJUSTES, RESPALDOS Y DATOS -->
+    <section id="tab-ajustes" class="tab-pane">
+      <div class="section-header">
+        <div>
+          <h2>Ajustes, Celular y Respaldos</h2>
+          <p class="text-muted">Conecta tu teléfono móvil, asegura tu información o exporta a Excel para tu gestor.</p>
+        </div>
+      </div>
+
+      <div class="settings-grid">
+        <div class="card bg-subtle border-primary">
+          <div class="card-header">
+            <h3>📱 Uso en Celulares (Android / iPhone)</h3>
+          </div>
+          <div class="card-body">
+            <p>Puedes usar esta aplicación directamente desde tu celular en cualquier lugar como una app nativa.</p>
+            <button class="btn btn-primary mt-3" onclick="app.openMobileModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+              <span>Ver Código QR e Instrucciones de Celular</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Respaldos de Seguridad</h3>
+          </div>
+          <div class="card-body">
+            <p>Guarda una copia de toda tu contabilidad, compras, inventario y gastos en tu dispositivo.</p>
+            <div class="btn-group mt-3">
+              <button class="btn btn-primary" onclick="app.downloadBackup()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Descargar Copia (.JSON)</span>
+              </button>
+              
+              <label class="btn btn-secondary cursor-pointer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                <span>Restaurar Copia</span>
+                <input type="file" id="backupFileInput" accept=".json" style="display:none;" onchange="app.restoreBackup(event)">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Exportación para el Gestor</h3>
+          </div>
+          <div class="card-body">
+            <p>Descarga tablas en formato CSV compatible con Microsoft Excel para entregar a tu gestor.</p>
+            <div class="btn-group mt-3 flex-wrap">
+              <button class="btn btn-outline" onclick="app.exportToCSV('trabajos')">Exportar Trabajos (CSV)</button>
+              <button class="btn btn-outline" onclick="app.exportToCSV('compras')">Exportar Compras (CSV)</button>
+              <button class="btn btn-outline" onclick="app.exportToCSV('gastos')">Exportar Gastos (CSV)</button>
+              <button class="btn btn-outline" onclick="app.exportToCSV('inventario')">Exportar Inventario (CSV)</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Datos de Demostración</h3>
+          </div>
+          <div class="card-body">
+            <p>Carga ejemplos realistas de peluquería o limpia los datos para empezar de cero.</p>
+            <div class="btn-group mt-3">
+              <button class="btn btn-outline-info" onclick="app.loadDemoData()">
+                <span>Cargar Datos de Ejemplo</span>
+              </button>
+              <button class="btn btn-danger" onclick="app.clearAllData()">
+                <span>Borrar Todo (Empezar en Limpio)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Moneda y Salón</h3>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label for="currencySymbol">Símbolo de Moneda:</label>
+              <input type="text" id="currencySymbol" class="form-control" style="max-width: 150px;" value="$" onchange="app.updateCurrency(this.value)">
+            </div>
+            <div class="form-group mt-3">
+              <label for="salonNameInput">Nombre de tu Salón:</label>
+              <input type="text" id="salonNameInput" class="form-control" value="Mi Salón de Belleza" onchange="app.updateSalonName(this.value)">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BARRA DE NAVEGACIÓN INFERIOR PARA TELÉFONOS (MOBILE BOTTOM NAV) -->
+  <nav class="mobile-bottom-nav">
+    <button class="mobile-nav-item active" data-tab="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+      <span>Inicio</span>
+    </button>
+    <button class="mobile-nav-item" data-tab="trabajos">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      <span>Trabajos</span>
+    </button>
+    <button class="mobile-nav-item" data-tab="compras">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+      <span>Compras</span>
+    </button>
+    <button class="mobile-nav-item" data-tab="inventario">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline></svg>
+      <span>Stock (oz)</span>
+    </button>
+    <button class="mobile-nav-item" data-tab="gastos">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+      <span>Gastos</span>
+    </button>
+    <button class="mobile-nav-item" data-tab="ajustes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      <span>Más</span>
+    </button>
+  </nav>
+
+  <!-- ==================== MODALES ==================== -->
+
+  <!-- MODAL: CONECTAR E INSTALAR EN CELULAR -->
+  <div id="modalMobile" class="modal-backdrop hidden">
+    <div class="modal modal-md">
+      <div class="modal-header">
+        <h3>📱 Instalar SalonPro en tu Teléfono Celular</h3>
+        <button class="modal-close" onclick="app.closeModal('modalMobile')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="text-sm text-muted">Abre la app en tu teléfono y úsala como cualquier aplicación nativa (funciona sin conexión gracias a la tecnología PWA).</p>
+        
+        <div class="qr-container-card mt-3">
+          <div id="qrCodeContainer" class="qr-code-box"></div>
+          <div class="mt-2 text-center">
+            <span class="text-xs text-muted block mb-1">Dirección directa en tu red Wi-Fi:</span>
+            <div class="mobile-url-pill" id="mobileUrlDisplay">http://192.168.1.101:3000</div>
+            <button class="btn btn-xs btn-outline mt-1" onclick="app.copyMobileUrl()">📋 Copiar Enlace</button>
+          </div>
+        </div>
+
+        <div class="instructions-steps mt-4">
+          <h4 class="mb-2 text-primary font-bold">Pasos sencillos para instalarla:</h4>
+          
+          <div class="instruction-box mb-2">
+            <strong>🤖 Si tienes Android (Google Chrome):</strong>
+            <ol class="pl-4 text-xs mt-1">
+              <li>Conecta tu celular a la misma red Wi-Fi y abre la dirección en Chrome (o escanea el código con tu cámara).</li>
+              <li>Toca el botón que dice <strong>"Instalar aplicación"</strong> o toca los <strong>3 puntos (⋮)</strong> arriba a la derecha.</li>
+              <li>Elige <strong>"Instalar aplicación"</strong> o <strong>"Agregar a la pantalla principal"</strong>. ¡Listo! Se creará el ícono en tu teléfono.</li>
+            </ol>
+          </div>
+
+          <div class="instruction-box">
+            <strong>🍎 Si tienes iPhone (Safari):</strong>
+            <ol class="pl-4 text-xs mt-1">
+              <li>Abre la dirección en el navegador <strong>Safari</strong> de tu iPhone.</li>
+              <li>Toca el botón <strong>Compartir</strong> (el cuadrado con la flecha hacia arriba en la barra inferior).</li>
+              <li>Baja y selecciona <strong>"Agregar a pantalla de inicio"</strong>. ¡Se abrirá en pantalla completa como una app normal!</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="app.closeModal('modalMobile')">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTRAR TRABAJO -->
+  <div id="modalJob" class="modal-backdrop hidden">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 id="modalJobTitle">Registrar Trabajo de Peluquería</h3>
+        <button class="modal-close" onclick="app.closeModal('modalJob')">&times;</button>
+      </div>
+      <form id="jobForm" onsubmit="app.handleSaveJob(event)">
+        <input type="hidden" id="jobEditId">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="jobDate">Fecha *</label>
+              <input type="date" id="jobDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="jobClient">Nombre de la Clienta *</label>
+              <input type="text" id="jobClient" class="form-control" placeholder="Ej: María López" required>
+            </div>
+            <div class="form-group">
+              <label for="jobService">Servicio / Descripción *</label>
+              <input type="text" id="jobService" class="form-control" placeholder="Ej: Balayage + Matiz + Tratamiento" required>
+            </div>
+            <div class="form-group">
+              <label for="jobStylist">Peluquero / Estilista</label>
+              <input type="text" id="jobStylist" class="form-control" placeholder="Ej: Laura">
+            </div>
+          </div>
+
+          <!-- SECCIÓN DE CONSUMO DE PRODUCTOS EN ONZAS -->
+          <div class="card bg-subtle mt-3 p-3">
+            <div class="flex-between mb-2">
+              <h4 class="m-0 text-primary">🧪 Productos Consumidos (Onzas)</h4>
+              <button type="button" class="btn btn-sm btn-outline" onclick="app.addJobProductRow()">+ Agregar Químico</button>
+            </div>
+            <p class="text-sm text-muted">Indica cuántas onzas usaste de cada producto. El sistema calculará automáticamente el costo y lo descontará del stock disponible.</p>
+            
+            <div id="jobProductsContainer" class="mt-2"></div>
+
+            <div class="material-cost-total flex-between mt-2 pt-2 border-top">
+              <span><strong>Costo Total de Químicos Gastados:</strong></span>
+              <span id="jobTotalMaterialCostDisplay" class="badge-cost">$0.00</span>
+            </div>
+          </div>
+
+          <!-- SECCIÓN FINANCIERA: COBRO, SALARIO Y MANO DE OBRA -->
+          <h4 class="mt-4 mb-2">Desglose Financiero del Trabajo</h4>
+          <div class="financial-breakdown-grid">
+            <div class="form-group">
+              <label for="jobCharge">Total Cobrado a la Clienta ($) *</label>
+              <input type="number" step="0.01" min="0" id="jobCharge" class="form-control form-control-lg font-bold" placeholder="0.00" required oninput="app.calculateJobFinancials()">
+            </div>
+            <div class="form-group">
+              <label for="jobSalaryType">Forma de Pago al Estilista:</label>
+              <select id="jobSalaryType" class="form-control" onchange="app.calculateJobFinancials()">
+                <option value="amount">Monto Fijo ($)</option>
+                <option value="percent">Porcentaje (%) del Cobro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="jobSalaryValue">Salario del Estilista ($ o %) *</label>
+              <input type="number" step="0.01" min="0" id="jobSalaryValue" class="form-control" placeholder="0.00" value="0" required oninput="app.calculateJobFinancials()">
+            </div>
+          </div>
+
+          <!-- RESUMEN VISUAL EN TIEMPO REAL -->
+          <div class="realtime-split-card mt-3">
+            <div class="split-col">
+              <span class="split-title">1. Cobrado</span>
+              <span class="split-amount text-primary" id="splitCharged">$0.00</span>
+            </div>
+            <div class="split-symbol">-</div>
+            <div class="split-col">
+              <span class="split-title">2. Materiales</span>
+              <span class="split-amount text-danger" id="splitMaterial">$0.00</span>
+            </div>
+            <div class="split-symbol">-</div>
+            <div class="split-col">
+              <span class="split-title">3. Salario</span>
+              <span class="split-amount text-warning" id="splitSalary">$0.00</span>
+            </div>
+            <div class="split-symbol">=</div>
+            <div class="split-col highlight">
+              <span class="split-title">4. Ganancia Salón</span>
+              <span class="split-amount text-success" id="splitProfit">$0.00</span>
+            </div>
+          </div>
+
+          <div class="form-group mt-3">
+            <label for="jobNotes">Notas adicionales (opcional)</label>
+            <textarea id="jobNotes" class="form-control" rows="2" placeholder="Detalles de la fórmula usada, clienta satisfecha, etc."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="app.closeModal('modalJob')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Trabajo y Actualizar Stock</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTRAR COMPRA -->
+  <div id="modalPurchase" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalPurchaseTitle">Registrar Compra de Producto</h3>
+        <button class="modal-close" onclick="app.closeModal('modalPurchase')">&times;</button>
+      </div>
+      <form id="purchaseForm" onsubmit="app.handleSavePurchase(event)">
+        <input type="hidden" id="purchaseEditId">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="purchaseDate">Fecha de Compra *</label>
+            <input type="date" id="purchaseDate" class="form-control" required>
+          </div>
+
+          <div class="form-group">
+            <label for="purchaseProductId">Producto Comprado *</label>
+            <div class="flex-row gap-2">
+              <select id="purchaseProductId" class="form-control" required onchange="app.updatePurchaseUnitHelp()"></select>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="app.openNewProductModal(true)">+ Nuevo</button>
+            </div>
+          </div>
+
+          <!-- MODO DE ENTRADA FLEXIBLE -->
+          <div class="card bg-subtle p-3 mb-3">
+            <label class="font-bold mb-2 block">¿Cómo ingresas la cantidad?</label>
+            <div class="flex-row gap-4 mb-2">
+              <label class="radio-label">
+                <input type="radio" name="purchaseEntryMode" value="totalOunces" checked onchange="app.togglePurchaseMode()">
+                Onzas Directas
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="purchaseEntryMode" value="byPackages" onchange="app.togglePurchaseMode()">
+                Por Envases / Botes
+              </label>
+            </div>
+
+            <!-- MODO A: ONZAS DIRECTAS -->
+            <div id="modeTotalOuncesContainer" class="form-group m-0">
+              <label for="purchaseTotalOunces">Cantidad Total de Onzas Compradas *</label>
+              <input type="number" step="0.01" min="0.01" id="purchaseTotalOunces" class="form-control" placeholder="Ej: 32 onzas" required oninput="app.calculatePurchaseOunceCost()">
+            </div>
+
+            <!-- MODO B: POR ENVASES -->
+            <div id="modeByPackagesContainer" class="form-grid hidden m-0">
+              <div class="form-group">
+                <label for="purchasePackagesCount">Número de Envases</label>
+                <input type="number" step="1" min="1" id="purchasePackagesCount" class="form-control" placeholder="Ej: 2" value="1" oninput="app.calculatePurchaseFromPackages()">
+              </div>
+              <div class="form-group">
+                <label for="purchaseOuncesPerPackage">Onzas por Envase (oz c/u)</label>
+                <input type="number" step="0.01" min="0.01" id="purchaseOuncesPerPackage" class="form-control" placeholder="Ej: 16" oninput="app.calculatePurchaseFromPackages()">
+              </div>
+            </div>
+          </div>
+
+          <!-- PRECIO PAGADO (VARIACIÓN DE PRECIOS) -->
+          <div class="form-group">
+            <label for="purchaseTotalCost">Precio Total Pagado por esta Compra ($) *</label>
+            <input type="number" step="0.01" min="0.01" id="purchaseTotalCost" class="form-control form-control-lg font-bold" placeholder="0.00" required oninput="app.calculatePurchaseOunceCost()">
+            <span class="text-muted text-sm">El sistema calcula el costo unitario por onza automáticamente.</span>
+          </div>
+
+          <!-- RESULTADO DEL COSTO POR ONZA -->
+          <div class="calculation-result-box mb-3">
+            <span class="text-muted">Costo resultante de esta compra:</span>
+            <div class="result-number" id="purchaseCalculatedCostPerOunce">$0.00 / oz</div>
+            <span class="text-sm text-info" id="purchaseImpactNotice">Se actualizará el stock y el costo promedio ponderado.</span>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="purchaseSupplier">Proveedor / Tienda</label>
+              <input type="text" id="purchaseSupplier" class="form-control" placeholder="Ej: Distribuidora Belleza">
+            </div>
+            <div class="form-group">
+              <label for="purchaseInvoice">N° Factura / Ticket</label>
+              <input type="text" id="purchaseInvoice" class="form-control" placeholder="Ej: #12498">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="purchaseNotes">Notas (opcional)</label>
+            <input type="text" id="purchaseNotes" class="form-control" placeholder="Ej: Descuento por mayoreo">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="app.closeModal('modalPurchase')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Compra y Sumar Stock</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CREAR / EDITAR PRODUCTO -->
+  <div id="modalProduct" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalProductTitle">Crear Nuevo Producto en Inventario</h3>
+        <button class="modal-close" onclick="app.closeModal('modalProduct')">&times;</button>
+      </div>
+      <form id="productForm" onsubmit="app.handleSaveProduct(event)">
+        <input type="hidden" id="productEditId">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="productName">Nombre del Producto *</label>
+            <input type="text" id="productName" class="form-control" placeholder="Ej: Peróxido 40 Vol, Matizador Azul..." required>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="productCategory">Categoría *</label>
+              <select id="productCategory" class="form-control" required>
+                <option value="peroxidos">Peróxidos / Activadores</option>
+                <option value="decolorantes">Polvos Decolorantes</option>
+                <option value="tintes">Tintes & Coloración</option>
+                <option value="alisados">Queratinas & Alisados</option>
+                <option value="tratamientos">Tratamientos Capilares</option>
+                <option value="shampoo">Shampoo & Acondicionador</option>
+                <option value="otros">Otros Productos</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="productUnit">Unidad de Medida</label>
+              <input type="text" id="productUnit" class="form-control" value="oz" readonly>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="productMinStock">Stock Mínimo de Alerta (oz)</label>
+              <input type="number" step="0.1" min="0" id="productMinStock" class="form-control" value="8" required>
+            </div>
+            <div class="form-group" id="productInitialStockContainer">
+              <label for="productInitialStock">Stock Inicial (oz opcional)</label>
+              <input type="number" step="0.1" min="0" id="productInitialStock" class="form-control" value="0" placeholder="0">
+            </div>
+          </div>
+
+          <div class="form-group" id="productInitialCostContainer">
+            <label for="productInitialCost">Costo Inicial Estimado ($/oz)</label>
+            <input type="number" step="0.01" min="0" id="productInitialCost" class="form-control" value="0.00" placeholder="0.00">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="app.closeModal('modalProduct')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Producto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTRAR GASTO DEL LOCAL -->
+  <div id="modalExpense" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalExpenseTitle">Registrar Gasto del Local</h3>
+        <button class="modal-close" onclick="app.closeModal('modalExpense')">&times;</button>
+      </div>
+      <form id="expenseForm" onsubmit="app.handleSaveExpense(event)">
+        <input type="hidden" id="expenseEditId">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="expenseDate">Fecha del Gasto *</label>
+              <input type="date" id="expenseDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="expenseCategory">Categoría del Gasto *</label>
+              <select id="expenseCategory" class="form-control" required>
+                <option value="local">🏢 Alquiler del Local</option>
+                <option value="gestor">📋 Gestor / Asesor Contable</option>
+                <option value="multas">⚠️ Multas / Tasas / Penalizaciones</option>
+                <option value="servicios">💡 Servicios (Electricidad, Agua, Internet, Gas)</option>
+                <option value="limpieza">🧴 Limpieza, Descartables, Guantes, Toallas</option>
+                <option value="publicidad">📢 Publicidad, Marketing, Redes</option>
+                <option value="mantenimiento">🔧 Mantenimiento / Reparaciones</option>
+                <option value="otros">📦 Otros Gastos</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="expenseAmount">Monto Pagado ($) *</label>
+            <input type="number" step="0.01" min="0.01" id="expenseAmount" class="form-control form-control-lg font-bold" placeholder="0.00" required>
+          </div>
+
+          <div class="form-group">
+            <label for="expenseDescription">Concepto / Detalle *</label>
+            <input type="text" id="expenseDescription" class="form-control" placeholder="Ej: Renta del mes, Pago al gestor contable..." required>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="expensePaymentMethod">Método de Pago</label>
+              <select id="expensePaymentMethod" class="form-control">
+                <option value="Efectivo">Efectivo</option>
+                <option value="Transferencia">Transferencia Bancaria</option>
+                <option value="Tarjeta">Tarjeta Débito/Crédito</option>
+                <option value="Bizum/Zelle/Móvil">Pago Móvil / Bizum / Zelle</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="expenseReceipt">N° Comprobante / Recibo</label>
+              <input type="text" id="expenseReceipt" class="form-control" placeholder="Opcional">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="app.closeModal('modalExpense')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Gasto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFIRMACIÓN -->
+  <div id="modalConfirm" class="modal-backdrop hidden">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3 id="confirmTitle">Confirmar Acción</h3>
+        <button class="modal-close" onclick="app.closeConfirm(false)">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmMessage">¿Estás seguro de continuar?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="app.closeConfirm(false)">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmOkBtn" onclick="app.closeConfirm(true)">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- SCRIPTS -->
+  <script src="qr.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
