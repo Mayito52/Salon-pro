@@ -39,6 +39,7 @@
       </div>
 
       <div class="header-actions">
+        <span id="syncStatus" class="sync-pill sync-wait">☁️ Conectando…</span>
         <button class="btn btn-sm btn-mobile-connect" onclick="app.openMobileModal()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
           <span>📱 Instalar en Celular</span>
@@ -467,6 +468,18 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
               <span>Ver Código QR e Instrucciones de Celular</span>
             </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>☁️ Cuenta y Nube</h3>
+          </div>
+          <div class="card-body">
+            <p id="cloudAccountText">No has iniciado sesión.</p>
+            <div class="btn-group mt-3">
+              <button class="btn btn-outline" onclick="app.signOutUser()">Cerrar sesión</button>
+            </div>
           </div>
         </div>
 
@@ -958,8 +971,47 @@
   <!-- TOAST CONTAINER -->
   <div id="toastContainer" class="toast-container"></div>
 
+  <!-- PANTALLA DE INICIO DE SESIÓN (NUBE) -->
+  <div id="authOverlay" class="auth-overlay">
+    <div class="auth-card">
+      <div class="brand-icon auth-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="6" cy="6" r="3"></circle>
+          <circle cx="6" cy="18" r="3"></circle>
+          <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+          <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
+          <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+        </svg>
+      </div>
+      <h2>SalonPro</h2>
+
+      <p id="authLoading" class="text-muted text-sm">Conectando…</p>
+
+      <div id="authBody" class="hidden">
+        <p class="text-muted text-sm mb-3">Entra con tu cuenta para ver y guardar tus datos en la nube.</p>
+        <form id="authForm" onsubmit="app.handleAuthSubmit(event)">
+          <div class="form-group">
+            <label for="authEmail">Correo</label>
+            <input type="email" id="authEmail" class="form-control" autocomplete="username" placeholder="tucorreo@ejemplo.com" required>
+          </div>
+          <div class="form-group">
+            <label for="authPassword">Contraseña</label>
+            <input type="password" id="authPassword" class="form-control" autocomplete="current-password" minlength="6" placeholder="Mínimo 6 caracteres" required>
+          </div>
+          <div id="authError" class="auth-error hidden"></div>
+          <button type="submit" id="authSubmitBtn" class="btn btn-primary auth-submit">Entrar</button>
+        </form>
+        <div class="auth-links">
+          <button type="button" id="authToggleBtn" class="link-btn" onclick="app.toggleAuthMode()">Crear cuenta nueva</button>
+          <button type="button" class="link-btn" onclick="app.resetPassword()">Olvidé mi contraseña</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- SCRIPTS -->
   <script src="qr.js"></script>
   <script src="app.js"></script>
+  <script type="module" src="cloud.js"></script>
 </body>
 </html>

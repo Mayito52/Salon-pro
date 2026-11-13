@@ -1007,3 +1007,86 @@ body {
     font-size: 1.3rem;
   }
 }
+
+/* ================= NUBE: INICIO DE SESIÓN Y ESTADO ================= */
+.sync-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.sync-ok { background: var(--success-bg); color: var(--success-text); border-color: #a7f3d0; }
+.sync-wait { background: var(--info-bg); color: var(--info-text); border-color: #bfdbfe; }
+.sync-offline { background: var(--warning-bg); color: var(--warning-text); border-color: #fde68a; }
+.sync-error { background: var(--danger-bg); color: var(--danger-text); border-color: #fecaca; }
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: linear-gradient(135deg, #fbeff4 0%, #f8f9fb 55%, #fbf5ee 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  overflow-y: auto;
+}
+.auth-overlay.hidden { display: none !important; }
+
+.auth-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  width: 100%;
+  max-width: 380px;
+  padding: 2rem 1.75rem;
+  text-align: center;
+}
+.auth-card h2 {
+  font-size: 1.5rem;
+  margin: 0.75rem 0 0.35rem;
+  color: #111827;
+}
+.auth-icon { margin: 0 auto; }
+.auth-card form, .auth-card .form-group { text-align: left; }
+.auth-submit { width: 100%; padding: 0.75rem 1rem; font-size: 0.95rem; }
+.auth-error {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.75rem;
+  font-size: 0.8rem;
+  margin-bottom: 0.85rem;
+  text-align: left;
+}
+.auth-links {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--primary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.link-btn:hover { color: var(--primary-hover); }

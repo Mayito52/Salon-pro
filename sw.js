@@ -1,9 +1,11 @@
-const CACHE_NAME = 'salonpro-v1';
+const CACHE_NAME = 'salonpro-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './app.css',
   './app.js',
+  './cloud.js',
+  './qr.js',
   './manifest.json',
   './icon.svg'
 ];
@@ -36,6 +38,11 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   // Solo interceptar peticiones GET
   if (event.request.method !== 'GET') return;
+
+  // Solo nuestros archivos y las librerías de Firebase (gstatic).
+  // Las llamadas a Firestore/Auth van directas a internet, sin pasar por la caché.
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin && url.hostname !== 'www.gstatic.com') return;
 
   event.respondWith(
     fetch(event.request)

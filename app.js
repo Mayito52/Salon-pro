@@ -36,12 +36,310 @@ class SalonApp {
   }
 
   init() {
-    this.loadFromStorage();
+    this.cloud = window.SalonCloud || null;
+    this.cloudLoaded = false;
+    this.initialChecked = false;
+    this.pendingSaves = 0;
+    this.syncState = 'connecting';
+    this.authMode = 'login';
+
     this.bindEvents();
-    this.renderAll();
+
+    if (this.cloud) {
+      this.startCloud();
+    } else {
+      // Sin conexión con Firebase (no se pudo cargar): se trabaja como antes, solo en este dispositivo
+      this.hideAuthOverlay();
+      this.loadFromStorage();
+      this.applySettingsToUI();
+      this.renderAll();
+      this.setSyncStatus('local');
+      this.showToast('No se pudo conectar con la nube. Los datos se guardan solo en este dispositivo.', 'danger');
+    }
   }
 
-  // ================= ALMACENAMIENTO LOCAL =================
+  emptyData() {
+    return {
+      settings: { currency: '$', salonName: 'Mi Salón de Peluquería' },
+      products: [],
+      purchases: [],
+      jobs: [],
+      expenses: []
+    };
+  }
+
+  // ================= NUBE (FIREBASE) =================
+  startCloud() {
+    this.setSyncStatus('connecting');
+
+    window.addEventListener('online', () => this.setSyncStatus(this.syncState));
+    window.addEventListener('offline', () => this.setSyncStatus(this.syncState));
+
+    this.cloud.onAuthChanged(user => {
+      this.showAuthForm();
+      if (user) {
+        this.hideAuthOverlay();
+        this.updateAccountUI(user.email);
+        this.cloudLoaded = false;
+        this.initialChecked = false;
+        this.setSyncStatus('connecting');
+        this.cloud.subscribe({
+          onData: (remote, meta) => this.handleCloudData(remote, meta),
+          onError: (err) => this.handleCloudError(err)
+        });
+      } else {
+        this.cloud.unsubscribe();
+        this.cloudLoaded = false;
+        this.initialChecked = false;
+        this.data = this.emptyData();
+        this.renderAll();
+        this.updateAccountUI(null);
+        this.showAuthOverlay();
+      }
+    });
+  }
+
+  // Llegan datos de la nube (al abrir y cada vez que cambian, también desde otro dispositivo)
+  handleCloudData(remote, meta) {
+    const defaults = this.emptyData().settings;
+    this.data = {
+      settings: Object.assign({}, defaults, remote.settings || {}),
+      products: remote.products,
+      purchases: remote.purchases,
+      jobs: remote.jobs,
+      expenses: remote.expenses
+    };
+    this.cloudLoaded = true;
+    this.applySettingsToUI();
+    this.renderAll();
+    if (this.pendingSaves === 0) this.setSyncStatus('synced');
+
+    // Cuenta nueva y confirmada por el servidor: se ofrece subir lo que hubiera en este teléfono
+    if (meta.allServer && meta.empty && !this.initialChecked) {
+      this.initialChecked = true;
+      this.offerInitialData();
+    }
+  }
+
+  handleCloudError(err) {
+    console.error('Error de Firestore:', err);
+    this.setSyncStatus('error');
+    this.showToast(this.cloudErrorMessage(err), 'danger');
+  }
+
+  cloudErrorMessage(err) {
+    const code = (err && err.code) || '';
+    if (code.includes('permission-denied')) {
+      return 'La nube rechazó los datos. Revisa las reglas de Firestore en la consola de Firebase.';
+    }
+    if (code.includes('not-found') || code.includes('failed-precondition')) {
+      return 'No se encontró la base de datos. Crea Firestore Database en la consola de Firebase.';
+    }
+    if (code.includes('unavailable')) {
+      return 'Sin conexión con la nube. Se guardará cuando vuelva internet.';
+    }
+    return 'No se pudo guardar en la nube. Inténtalo de nuevo.';
+  }
+
+  // Datos que la versión anterior guardó en la memoria de este teléfono/navegador
+  readLegacyLocal() {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (!stored) return null;
+      const parsed = JSON.parse(stored);
+      if (!parsed || !Array.isArray(parsed.products)) return null;
+      parsed.settings = Object.assign({}, this.emptyData().settings, parsed.settings || {});
+      parsed.purchases = parsed.purchases || [];
+      parsed.jobs = parsed.jobs || [];
+      parsed.expenses = parsed.expenses || [];
+      return parsed;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  offerInitialData() {
+    const local = this.readLegacyLocal();
+    const hasUserData = local && (
+      local.jobs.length > 0 ||
+      local.purchases.length > 0 ||
+      local.expenses.length > 0 ||
+      JSON.stringify(local.products) !== JSON.stringify(DEFAULT_PRODUCTS)
+    );
+
+    const startFresh = () => {
+      this.data.products = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+      this.saveToStorage();
+      this.renderAll();
+    };
+
+    if (hasUserData) {
+      const msg = `Encontré datos guardados en este dispositivo (${local.jobs.length} trabajos, ${local.purchases.length} compras, ${local.expenses.length} gastos). ¿Quieres subirlos a la nube?`;
+      this.showConfirm(msg, () => {
+        this.data = local;
+        this.saveToStorage();
+        this.applySettingsToUI();
+        this.renderAll();
+        this.showToast('Tus datos se subieron a la nube', 'success');
+      }, startFresh);
+    } else {
+      startFresh();
+    }
+  }
+
+  setSyncStatus(state) {
+    this.syncState = state;
+    const el = document.getElementById('syncStatus');
+    if (!el) return;
+
+    const offline = !navigator.onLine;
+    let text = '';
+    let cls = 'sync-wait';
+
+    if (state === 'local') {
+      text = '📱 Solo en este dispositivo';
+      cls = 'sync-offline';
+    } else if (state === 'error') {
+      text = '⚠️ Error con la nube';
+      cls = 'sync-error';
+    } else if (state === 'saving') {
+      text = offline ? '📴 Sin conexión · se subirá al volver' : '☁️ Guardando…';
+      cls = offline ? 'sync-offline' : 'sync-wait';
+    } else if (state === 'synced') {
+      text = offline ? '📴 Sin conexión' : '☁️ Guardado en la nube';
+      cls = offline ? 'sync-offline' : 'sync-ok';
+    } else {
+      text = '☁️ Conectando…';
+    }
+
+    el.textContent = text;
+    el.className = 'sync-pill ' + cls;
+  }
+
+  // ================= INICIO DE SESIÓN =================
+  showAuthOverlay() {
+    const overlay = document.getElementById('authOverlay');
+    if (overlay) overlay.classList.remove('hidden');
+  }
+
+  hideAuthOverlay() {
+    const overlay = document.getElementById('authOverlay');
+    if (overlay) overlay.classList.add('hidden');
+  }
+
+  // Ya se sabe si hay sesión o no: se muestra el formulario en lugar de "Conectando…"
+  showAuthForm() {
+    const loading = document.getElementById('authLoading');
+    const form = document.getElementById('authBody');
+    if (loading) loading.classList.add('hidden');
+    if (form) form.classList.remove('hidden');
+  }
+
+  setAuthError(message) {
+    const el = document.getElementById('authError');
+    if (!el) return;
+    if (message) {
+      el.textContent = message;
+      el.classList.remove('hidden');
+    } else {
+      el.textContent = '';
+      el.classList.add('hidden');
+    }
+  }
+
+  toggleAuthMode() {
+    this.authMode = this.authMode === 'login' ? 'signup' : 'login';
+    const isLogin = this.authMode === 'login';
+    document.getElementById('authSubmitBtn').textContent = isLogin ? 'Entrar' : 'Crear cuenta';
+    document.getElementById('authToggleBtn').textContent = isLogin ? 'Crear cuenta nueva' : 'Ya tengo cuenta';
+    document.getElementById('authPassword').setAttribute('autocomplete', isLogin ? 'current-password' : 'new-password');
+    this.setAuthError('');
+  }
+
+  async handleAuthSubmit(e) {
+    e.preventDefault();
+    if (!this.cloud) return;
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+    const btn = document.getElementById('authSubmitBtn');
+
+    this.setAuthError('');
+    btn.disabled = true;
+    try {
+      if (this.authMode === 'signup') {
+        await this.cloud.signUp(email, password);
+      } else {
+        await this.cloud.signIn(email, password);
+      }
+      document.getElementById('authPassword').value = '';
+    } catch (err) {
+      this.setAuthError(this.authErrorMessage(err));
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  async resetPassword() {
+    if (!this.cloud) return;
+    const email = document.getElementById('authEmail').value.trim();
+    if (!email) {
+      this.setAuthError('Escribe tu correo arriba y vuelve a pulsar "Olvidé mi contraseña".');
+      return;
+    }
+    try {
+      await this.cloud.resetPassword(email);
+      this.setAuthError('');
+      this.showToast('Te enviamos un correo para cambiar la contraseña', 'success');
+    } catch (err) {
+      this.setAuthError(this.authErrorMessage(err));
+    }
+  }
+
+  authErrorMessage(err) {
+    const code = (err && err.code) || '';
+    const map = {
+      'auth/invalid-email': 'El correo no es válido.',
+      'auth/missing-password': 'Escribe la contraseña.',
+      'auth/invalid-credential': 'Correo o contraseña incorrectos.',
+      'auth/wrong-password': 'Correo o contraseña incorrectos.',
+      'auth/user-not-found': 'Correo o contraseña incorrectos.',
+      'auth/email-already-in-use': 'Ese correo ya tiene una cuenta. Pulsa "Ya tengo cuenta" para entrar.',
+      'auth/weak-password': 'La contraseña es muy corta (mínimo 6 caracteres).',
+      'auth/too-many-requests': 'Demasiados intentos. Espera unos minutos e inténtalo otra vez.',
+      'auth/network-request-failed': 'No hay conexión a internet.',
+      'auth/operation-not-allowed': 'Falta activar "Correo/contraseña" en Authentication, dentro de la consola de Firebase.'
+    };
+    return map[code] || 'No se pudo iniciar sesión. Inténtalo de nuevo.';
+  }
+
+  updateAccountUI(email) {
+    const el = document.getElementById('cloudAccountText');
+    if (!el) return;
+    el.textContent = email
+      ? `Sesión iniciada como ${email}. Tus datos se guardan en la nube y se ven igual desde cualquier dispositivo.`
+      : 'No has iniciado sesión.';
+  }
+
+  signOutUser() {
+    if (!this.cloud) return;
+    this.showConfirm('¿Cerrar sesión? Tus datos siguen guardados en la nube.', async () => {
+      try {
+        await this.cloud.signOut();
+      } catch (err) {
+        this.showToast('No se pudo cerrar la sesión', 'danger');
+      }
+    });
+  }
+
+  applySettingsToUI() {
+    const cur = document.getElementById('currencySymbol');
+    const name = document.getElementById('salonNameInput');
+    if (cur && document.activeElement !== cur) cur.value = this.data.settings.currency || '$';
+    if (name && document.activeElement !== name) name.value = this.data.settings.salonName || '';
+  }
+
+  // ================= ALMACENAMIENTO =================
+  // Modo sin nube (solo si Firebase no se pudo cargar): memoria del dispositivo
   loadFromStorage() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -58,7 +356,27 @@ class SalonApp {
     }
   }
 
+  // Guarda los cambios: en la nube (Firestore) o, sin nube, en este dispositivo
   saveToStorage() {
+    if (this.cloud) {
+      // No se escribe nada hasta haber recibido los datos de la nube, para no pisarlos
+      if (!this.cloudLoaded) return;
+      this.pendingSaves++;
+      this.setSyncStatus('saving');
+      this.cloud.sync(this.data)
+        .then(() => {
+          this.pendingSaves = Math.max(0, this.pendingSaves - 1);
+          if (this.pendingSaves === 0) this.setSyncStatus('synced');
+        })
+        .catch(err => {
+          this.pendingSaves = Math.max(0, this.pendingSaves - 1);
+          console.error('Error guardando en la nube:', err);
+          this.setSyncStatus('error');
+          this.showToast(this.cloudErrorMessage(err), 'danger');
+        });
+      return;
+    }
+
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.data));
     } catch (e) {
@@ -1493,8 +1811,10 @@ class SalonApp {
       try {
         const parsed = JSON.parse(e.target.result);
         if (parsed.products && parsed.purchases && parsed.jobs && parsed.expenses) {
+          parsed.settings = Object.assign({}, this.emptyData().settings, parsed.settings || {});
           this.data = parsed;
           this.saveToStorage();
+          this.applySettingsToUI();
           this.renderAll();
           this.showToast('¡Copia de seguridad restaurada correctamente!', 'success');
         } else {
@@ -1718,6 +2038,7 @@ class SalonApp {
         expenses: []
       };
       this.saveToStorage();
+      this.applySettingsToUI();
       this.renderAll();
       this.showToast('Se han restablecido los datos en blanco', 'info');
       this.switchTab('dashboard');
@@ -1748,8 +2069,9 @@ class SalonApp {
     if (modal) modal.classList.add('hidden');
   }
 
-  showConfirm(message, callback) {
+  showConfirm(message, callback, onCancel) {
     this.pendingConfirmCallback = callback;
+    this.pendingCancelCallback = onCancel || null;
     const msgEl = document.getElementById('confirmMessage');
     if (msgEl) msgEl.textContent = message;
     this.openModal('modalConfirm');
@@ -1757,10 +2079,15 @@ class SalonApp {
 
   closeConfirm(confirmed) {
     this.closeModal('modalConfirm');
-    if (confirmed && typeof this.pendingConfirmCallback === 'function') {
-      this.pendingConfirmCallback();
-    }
+    const onOk = this.pendingConfirmCallback;
+    const onCancel = this.pendingCancelCallback;
     this.pendingConfirmCallback = null;
+    this.pendingCancelCallback = null;
+    if (confirmed && typeof onOk === 'function') {
+      onOk();
+    } else if (!confirmed && typeof onCancel === 'function') {
+      onCancel();
+    }
   }
 
   showToast(message, type = 'info') {
@@ -1833,3 +2160,10 @@ let app;
 window.addEventListener('DOMContentLoaded', () => {
   app = new SalonApp();
 });
+
+// Modo sin conexión: guarda la propia app en el teléfono para poder abrirla sin internet
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => console.warn('Service worker no registrado:', err));
+  });
+}
